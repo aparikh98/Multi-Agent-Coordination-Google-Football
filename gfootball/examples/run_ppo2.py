@@ -70,6 +70,7 @@ def create_single_football_env(seed, level):
   """Creates gfootball environment."""
   env = football_env.create_environment(
       env_name=level, stacked=('stacked' in 'extracted_stacked'),
+      representation='simple115',
       rewards='scoring',
       logdir=logger.get_dir(),
       enable_goal_videos=False,
@@ -124,7 +125,7 @@ from stable_baselines import PPO2
 
 def train():
     n_cpu = 4
-    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_empty_goal') for i in range(1)])
+    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_3_vs_1_with_keeper') for i in range(1)])
     print("Start LEARNING")
 
     model = PPO2(MlpPolicy,
@@ -143,12 +144,12 @@ def train():
                )
     print("DONE LEARNING From academy goal")
 
-    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_empty_goal_close') for i in range(1)])
-    model.env = env
-    model.learn(total_timesteps=FLAGS.num_timesteps //2,
-               log_interval=1,
-               )
-    print("DONE LEARNING from academy empty goal close")
+    # env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_empty_goal_close') for i in range(1)])
+    # model.env = env
+    # model.learn(total_timesteps=FLAGS.num_timesteps //2,
+    #            log_interval=1,
+    #            )
+    # print("DONE LEARNING from academy empty goal close")
 
     # model.save("ppo2_stable_baselines")
     #
