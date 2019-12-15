@@ -106,7 +106,7 @@ class Config(object):
         'display_game_stats': True,
         'dump_full_episodes': False,
         'dump_scores': False,
-        'game_difficulty': 0.6,
+        'game_difficulty': 0.4,
         'players': ['agent:left_players=1'],
         'level': '11_vs_11_stochastic',
         'physics_steps_per_frame': 10,

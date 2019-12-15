@@ -33,7 +33,7 @@ flags.DEFINE_string('players', 'keyboard:left_players=1',
                     'player on the left by default')
 flags.DEFINE_string('level', '', 'Level to play')
 flags.DEFINE_enum('action_set', 'full', ['default', 'full'], 'Action set')
-flags.DEFINE_bool('real_time', True,
+flags.DEFINE_bool('real_time', False,
                   'If true, environment will slow down so humans can play.')
 
 
@@ -43,10 +43,10 @@ def main(_):
              ), ('Player type \'agent\' can not be used with play_game.')
   cfg = config.Config({
       'action_set': FLAGS.action_set,
-      'dump_full_episodes': True,
+      'dump_full_episodes': False,
       'players': players,
-      'real_time': FLAGS.real_time,
-      'render': True
+      'real_time': False,
+      'render': False
   })
   if FLAGS.level:
     cfg['level'] = FLAGS.level
