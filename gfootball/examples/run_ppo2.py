@@ -42,7 +42,7 @@ flags.DEFINE_enum('reward_experiment', 'scoring',
 flags.DEFINE_enum('policy', 'cnn', ['cnn', 'lstm', 'mlp', 'impala_cnn',
                                     'gfootball_impala_cnn'],
                   'Policy architecture')
-flags.DEFINE_integer('num_timesteps', int(2e6),
+flags.DEFINE_integer('num_timesteps', int(5e4),
                      'Number of timesteps to run for.')
 flags.DEFINE_integer('num_envs', 8,
                      'Number of environments to run in parallel.')
@@ -75,8 +75,7 @@ def create_single_football_env(seed, level):
       enable_goal_videos=False,
       enable_full_episode_videos=False,
       render=False,
-      dump_frequency=0,
-      number_of_left_players_agent_controls=1)
+      dump_frequency=0)
   env = monitor.Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(),
                                                                str(seed)))
   return env
