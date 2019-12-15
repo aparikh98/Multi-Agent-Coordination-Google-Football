@@ -135,48 +135,6 @@ def train():
                 verbose=1,
                 noptepochs=FLAGS.noptepochs,
                 learning_rate=FLAGS.lr,
-                tensorboard_log = 'gfootball/tensorboard/academy_two_vs_one_left_test',
-                cliprange=FLAGS.cliprange)
-
-    model.learn(total_timesteps=1000,
-               log_interval=1,
-               )
-    print("DONE LEARNING From academy goal")
-    model.save("2v1_player1_test")
-
-    n_cpu = 7
-    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_two_vs_one_right') for i in range(n_cpu)])
-    print("Start LEARNING")
-
-    model = PPO2(MlpPolicy,
-                env,n_steps=FLAGS.nsteps,
-                gamma=FLAGS.gamma,
-                ent_coef=FLAGS.ent_coef,
-                nminibatches=FLAGS.nminibatches,
-                verbose=1,
-                noptepochs=FLAGS.noptepochs,
-                learning_rate=FLAGS.lr,
-                tensorboard_log = 'gfootball/tensorboard/academy_two_vs_one_right_test',
-                cliprange=FLAGS.cliprange)
-
-    model.learn(total_timesteps=1000,
-               log_interval=1,
-               )
-    print("DONE LEARNING From academy goal")
-    model.save("2v1_player2_test")
-
-    n_cpu = 7
-    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_two_vs_one_left') for i in range(n_cpu)])
-    print("Start LEARNING")
-
-    model = PPO2(MlpPolicy,
-                env,n_steps=FLAGS.nsteps,
-                gamma=FLAGS.gamma,
-                ent_coef=FLAGS.ent_coef,
-                nminibatches=FLAGS.nminibatches,
-                verbose=1,
-                noptepochs=FLAGS.noptepochs,
-                learning_rate=FLAGS.lr,
                 tensorboard_log = 'gfootball/tensorboard/academy_two_vs_one_left',
                 cliprange=FLAGS.cliprange)
 
