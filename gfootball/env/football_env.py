@@ -43,6 +43,10 @@ class FootballEnv(gym.Env):
     self._agent_index = -1
     self._agent_left_position = -1
     self._agent_right_position = -1
+    self._agent2 = None
+    self._agent2_index = -1
+    self._agent2_left_position = -1
+    self._agent2_right_position = -1
     self._players = self._construct_players(config['players'], player_config)
     self._env = football_env_wrapper.FootballEnvWrapper(self._config)
     self._num_actions = len(football_action_set.get_action_set(self._config))
@@ -77,12 +81,17 @@ class FootballEnv(gym.Env):
       player_config = copy.deepcopy(config)
       player_config.update(d)
       player = player_factory.Player(player_config, self._config)
-      if name == 'agent':
-        assert not self._agent, 'Only one \'agent\' player allowed'
+      if name == 'agent' and not self._agent:
         self._agent = player
         self._agent_index = len(result)
         self._agent_left_position = left_position
         self._agent_right_position = right_position
+      elif name == 'agent' and not self._agent2:
+        # assert not self._agent2, 'Only one \'agent\' player allowed'
+        self._agent2 = player
+        self._agent2_index = len(result)
+        self._agent2_left_position = left_position
+        self._agent2_right_position = right_position
       result.append(player)
       left_position += player.num_controlled_left_players()
       right_position += player.num_controlled_right_players()
@@ -155,11 +164,21 @@ class FootballEnv(gym.Env):
     return actions
 
   def step(self, action):
-    if self._agent:
-      self._agent.set_action(action)
+    if len(action) == 2:
+        action1, action2 = action
+        if self._agent:
+          self._agent.set_action(action1)
+        if self._agent2:
+          self._agent2.set_action(action1)
+    else:
+        if self._agent:
+          self._agent.set_action(action)
+        if self._agent2:
+          self._agent2.set_action(action)
+
     observation, reward, done = self._env.step(self._get_actions())
     score_reward = reward
-    if self._agent:
+    if self._agent and self._agent2:
       observation = self._convert_observations(observation, self._agent,
                                                self._agent_left_position,
                                                self._agent_right_position)
@@ -180,10 +199,11 @@ class FootballEnv(gym.Env):
     for player in self._players:
       player.reset()
     observation = self._env.observation()
-    if self._agent:
+    if self._agent and self._agent2:
       observation = self._convert_observations(observation, self._agent,
                                                self._agent_left_position,
                                                self._agent_right_position)
+
     self.last_observation = observation
     return observation
 
