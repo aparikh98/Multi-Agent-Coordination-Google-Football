@@ -27,6 +27,7 @@ from baselines.ppo2 import ppo2
 import gfootball.env as football_env
 from gfootball.examples import models
 import tensorflow as tf
+import numpy as np
 
 flags = tf.app.flags
 FLAGS = tf.app.flags.FLAGS
@@ -95,25 +96,27 @@ from stable_baselines import PPO2
 # multiprocess environment
 
 def train():
-    model_1 = PPO2.load("2v1_player1")
-    model_2 = PPO2.load("2v1_player2_test")
-    print("LOADED BOTH AGENTS")
+    model_1 = PPO2.load("3v1_player1")
+    model_2 = PPO2.load("3v1_player2")
+    model_3 = PPO2.load("3v1_player3")
+    print("LOADED THREE AGENTS")
     # Enjoy trained agent
-    env = DummyVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_two_vs_one_left') for i in range(1)])
+    env = DummyVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_three_vs_one_left') for i in range(1)])
     # env = create_single_football_env(1, 'academy_two_vs_one_left')
     obs= env.reset()
-    rewards_1 = []
-    rewards_2 = []
+    rewards = []
     i = 0
-    while i < (20):
+    while i < (200):
         action1, _states1 = model_1.predict(obs)
         action2, _states2 = model_2.predict(obs)
+        action3, _states2 = model_3.predict(obs)
         action = (action1, action2)
-        obs, rewards, dones, info = env.step(action)
+        obs, reward, dones, info = env.step(action)
         if (dones):
-            rewards_1.append(rewards[0])
+            rewards.append(reward[0])
             i+=1
-    print(rewards_1)
+    print(rewards)
+    print("iterations: ", i , " mean reward: ", np.mean(rewards), " reward std dev: ", np.std(rewards), " max reward: ", np.max(rewards), " min reward: ", np.mean(rewards))
 
 if __name__ == '__main__':
   train()
