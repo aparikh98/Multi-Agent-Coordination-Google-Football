@@ -108,6 +108,7 @@ class FootballEnv(gym.Env):
       position = left_player_position if is_left else right_player_position
       for x in range(player.num_controlled_left_players() if is_left
                      else player.num_controlled_right_players()):
+        x +=1
         o = {}
         for v in constants.EXPOSED_OBSERVATIONS:
           # Active and sticky_actions are added below.

@@ -30,9 +30,9 @@ from ray.tune.registry import register_env
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--num-agents', type=int, default=2)
-parser.add_argument('--num-policies', type=int, default=2)
-parser.add_argument('--num-iters', type=int, default=2e6)
+parser.add_argument('--num-agents', type=int, default=3)
+parser.add_argument('--num-policies', type=int, default=3)
+parser.add_argument('--num-iters', type=int, default=5e6)
 parser.add_argument('--simple', action='store_true')
 
 
@@ -41,8 +41,8 @@ class RllibGFootball(MultiAgentEnv):
 
   def __init__(self, num_agents):
     self.env = football_env.create_environment(
-        env_name='academy_two_vs_one_left', stacked=False,
-        logdir='/tmp/rllib_test',
+        env_name='academy_three_vs_one_left', stacked=True,
+        logdir='gfootball/rllib',
         enable_goal_videos=False, enable_full_episode_videos=False, render=False,
         dump_frequency=0,
         number_of_left_players_agent_controls=num_agents,
@@ -105,26 +105,26 @@ if __name__ == '__main__':
 
   tune.run(
       'PPO',
-      stop={'training_iteration': args.num_iters},
+      stop={'timesteps_total': args.num_iters},
       checkpoint_freq=50,
       config={
           'env': 'gfootball',
           'lambda': 0.95,
-          'kl_coeff': 0.2,
+          'kl_coeff': 0.27,
           'clip_rewards': False,
           'vf_clip_param': 10.0,
           'entropy_coeff': 0.01,
-          'train_batch_size': 2000,
+          'train_batch_size': 128*7,
           'sample_batch_size': 100,
           'sgd_minibatch_size': 500,
           'num_sgd_iter': 10,
-          'num_workers': 7,
+          'num_workers': 3,
           'num_envs_per_worker': 1,
           'batch_mode': 'truncate_episodes',
           'observation_filter': 'NoFilter',
           'vf_share_layers': 'true',
           'num_gpus': 1,
-          'lr': 2.5e-4,
+          'lr': 0.00008,
           'log_level': 'DEBUG',
           'simple_optimizer': args.simple,
           'multiagent': {

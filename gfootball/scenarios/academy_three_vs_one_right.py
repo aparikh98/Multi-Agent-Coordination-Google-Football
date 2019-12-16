@@ -31,8 +31,9 @@ def build_scenario(builder):
 
   builder.SetTeam(Team.e_Left)
   builder.AddPlayer(-1.0, 0.0, e_PlayerRole_GK)
-  builder.AddPlayer(0.5, -0.2, e_PlayerRole_CB)
   builder.AddPlayer(0.5, 0.2, e_PlayerRole_CB)
+  builder.AddPlayer(0.5, -0.2, e_PlayerRole_CB)
+  builder.AddPlayer(0.5, 0, e_PlayerRole_CB)
 
   builder.SetTeam(Team.e_Right)
   builder.AddPlayer(1.0, 0.0, e_PlayerRole_GK)

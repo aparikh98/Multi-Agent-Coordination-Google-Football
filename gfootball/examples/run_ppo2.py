@@ -42,7 +42,7 @@ flags.DEFINE_enum('reward_experiment', 'scoring',
 flags.DEFINE_enum('policy', 'cnn', ['cnn', 'lstm', 'mlp', 'impala_cnn',
                                     'gfootball_impala_cnn'],
                   'Policy architecture')
-flags.DEFINE_integer('num_timesteps', int(5e4),
+flags.DEFINE_integer('num_timesteps', int(25e4),
                      'Number of timesteps to run for.')
 flags.DEFINE_integer('num_envs', 8,
                      'Number of environments to run in parallel.')
@@ -81,36 +81,6 @@ def create_single_football_env(seed, level):
   return env
 
 
-#def train():
-  #   """Trains a PPO2 policy."""
-  # ncpu = multiprocessing.cpu_count()
-  # config = tf.ConfigProto(allow_soft_placement=True,
-  #                         intra_op_parallelism_threads=ncpu,
-  #                         inter_op_parallelism_threads=ncpu)
-  # config.gpu_options.allow_growth = True
-  # tf.Session(config=config).__enter__()
-  #
-  # vec_env = SubprocVecEnv([
-  #     (lambda _i=i: create_single_football_env(_i, FLAGS.level))
-  #     for i in range(FLAGS.num_envs)
-  # ], context=None)
-  # print("learn for", FLAGS.num_timesteps)
-  # ppo2.learn(network=FLAGS.policy,
-  #            total_timesteps=FLAGS.num_timesteps,
-  #            env=vec_env,
-  #            seed=FLAGS.seed,
-  #            nsteps=FLAGS.nsteps,
-  #            nminibatches=FLAGS.nminibatches,
-  #            noptepochs=FLAGS.noptepochs,
-  #            gamma=FLAGS.gamma,
-  #            ent_coef=FLAGS.ent_coef,
-  #            lr=FLAGS.lr,
-  #            log_interval=1,
-  #            save_interval=FLAGS.save_interval,
-  #            cliprange=FLAGS.cliprange,
-  #            load_path=FLAGS.load_path)
-  # print("DONE TRAINING")
-
 import gym
 
 # from stable_baselines.deepq.policies import MlpPolicy
@@ -124,7 +94,8 @@ from stable_baselines import PPO2
 
 def train():
     n_cpu = 7
-    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_two_vs_one_left') for i in range(n_cpu)])
+
+    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_three_vs_one_right') for i in range(n_cpu)])
     print("Start LEARNING")
 
     model = PPO2(MlpPolicy,
@@ -135,17 +106,16 @@ def train():
                 verbose=1,
                 noptepochs=FLAGS.noptepochs,
                 learning_rate=FLAGS.lr,
-                tensorboard_log = 'gfootball/tensorboard/academy_two_vs_one_left',
+                tensorboard_log = 'gfootball/tensorboard/academy_three_vs_one_right',
                 cliprange=FLAGS.cliprange)
 
     model.learn(total_timesteps=FLAGS.num_timesteps,
                log_interval=1,
                )
     print("DONE LEARNING From academy goal")
-    model.save("2v1_player1")
+    model.save("3v1_player2")
 
-    n_cpu = 7
-    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_two_vs_one_right') for i in range(n_cpu)])
+    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_three_vs_one_mid') for i in range(n_cpu)])
     print("Start LEARNING")
 
     model = PPO2(MlpPolicy,
@@ -156,58 +126,34 @@ def train():
                 verbose=1,
                 noptepochs=FLAGS.noptepochs,
                 learning_rate=FLAGS.lr,
-                tensorboard_log = 'gfootball/tensorboard/academy_two_vs_one_right',
+                tensorboard_log = 'gfootball/tensorboard/academy_three_vs_one_mid',
                 cliprange=FLAGS.cliprange)
 
     model.learn(total_timesteps=FLAGS.num_timesteps,
                log_interval=1,
                )
     print("DONE LEARNING From academy goal")
-    model.save("2v1_player2")
-
-    # env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_empty_goal_close') for i in range(1)])
-    # model.env = env
-    # model.learn(total_timesteps=FLAGS.num_timesteps //2,
+    model.save("3v1_player3")
+    # n_cpu = 7
+    # env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_two_vs_one_right') for i in range(n_cpu)])
+    # print("Start LEARNING")
+    #
+    # model = PPO2(MlpPolicy,
+    #             env,n_steps=FLAGS.nsteps,
+    #             gamma=FLAGS.gamma,
+    #             ent_coef=FLAGS.ent_coef,
+    #             nminibatches=FLAGS.nminibatches,
+    #             verbose=1,
+    #             noptepochs=FLAGS.noptepochs,
+    #             learning_rate=FLAGS.lr,
+    #             tensorboard_log = 'gfootball/tensorboard/academy_two_vs_one_right',
+    #             cliprange=FLAGS.cliprange)
+    #
+    # model.learn(total_timesteps=FLAGS.num_timesteps,
     #            log_interval=1,
     #            )
-    # print("DONE LEARNING from academy empty goal close")
-
-    # model.save("ppo2_stable_baselines")
-    #
-    # del model # remove to demonstrate saving and loading
-    #
-    # model = PPO2.load("ppo2_stable_baselines")
-
-    # Enjoy trained agent
-    # env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_empty_goal_close') for i in range(1)])
-    # # env = DummyVecEnv([lambda: env])
-    # obs = env.reset()
-    # rewards_1 = []
-    # for i in range (200):
-    #     while True:
-    #         action, _states = model.predict(obs)
-    #         obs, rewards, dones, info = env.step(action)
-    #         if (dones):
-    #             rewards_1.append(rewards[0])
-    #             break
-    # print("DONE with first eval")
-    # print(rewards_1)
-
-    # env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_empty_goal') for i in range(1)])
-    # obs = env.reset()
-    # rewards_2 = []
-    # for i in range (200):
-    #     while True:
-    #         action, _states = model.predict(obs)
-    #         obs, rewards, dones, info = env.step(action)
-    #         if (dones):
-    #             rewards_2.append(rewards[0])
-    #             break
-    # print("DONE with second eval")
-    # print(rewards_2)
-    #
-    # # print("Rewards_1: ", rewards_1)
-    # print("Rewards_2: ", rewards_2)
+    # print("DONE LEARNING From academy goal")
+    # model.save("2v1_player2")
 
 
 
