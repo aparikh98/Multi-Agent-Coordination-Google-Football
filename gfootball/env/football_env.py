@@ -51,6 +51,7 @@ class FootballEnv(gym.Env):
 
   @property
   def action_space(self):
+    print('Num Players agent controls', self._config.number_of_players_agent_controls())
     if self._config.number_of_players_agent_controls() > 1:
       return gym.spaces.MultiDiscrete(
           [self._num_actions] * self._config.number_of_players_agent_controls())

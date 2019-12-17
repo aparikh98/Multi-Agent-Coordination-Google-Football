@@ -75,9 +75,12 @@ def create_single_football_env(seed, level):
       enable_goal_videos=False,
       enable_full_episode_videos=False,
       render=False,
-      dump_frequency=0)
+      dump_frequency=0,
+      number_of_left_players_agent_controls=2)
   env = monitor.Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(),
                                                                str(seed)))
+
+  action_space = env.action_space()
   return env
 
 

@@ -129,6 +129,7 @@ def create_environment(env_name='',
       'render': render,
       'tracesdir': logdir,
       'write_video': write_video,
+      'number_of_players_agent_controls': number_of_left_players_agent_controls
   })
   env = football_env.FootballEnv(c)
   if dump_frequency > 1:
