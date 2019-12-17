@@ -120,7 +120,10 @@ def create_environment(env_name='',
       number_of_right_players_agent_controls)),
       ('agent:left_players=%d, right_players=%d' % (
           number_of_left_players_agent_controls,
-          number_of_right_players_agent_controls))]
+          number_of_right_players_agent_controls)),
+          ('agent:left_players=%d, right_players=%d' % (
+              number_of_left_players_agent_controls,
+              number_of_right_players_agent_controls))]
   if extra_players is not None:
     players.extend(extra_players)
   c = config.Config({

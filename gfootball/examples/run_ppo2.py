@@ -42,7 +42,7 @@ flags.DEFINE_enum('reward_experiment', 'scoring',
 flags.DEFINE_enum('policy', 'cnn', ['cnn', 'lstm', 'mlp', 'impala_cnn',
                                     'gfootball_impala_cnn'],
                   'Policy architecture')
-flags.DEFINE_integer('num_timesteps', int(5e4),
+flags.DEFINE_integer('num_timesteps', int(25e4),
                      'Number of timesteps to run for.')
 flags.DEFINE_integer('num_envs', 8,
                      'Number of environments to run in parallel.')
@@ -79,6 +79,8 @@ def create_single_football_env(seed, level):
       dump_frequency=0)
   env = monitor.Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(),
                                                                str(seed)))
+  action_space = env.action_space
+  print(action_space)
   return env
 
 
@@ -95,25 +97,24 @@ from stable_baselines import PPO2
 # multiprocess environment
 
 def train():
-    model_1 = PPO2.load("2v1_player1")
-    model_2 = PPO2.load("2v1_player2_test")
-    print("LOADED BOTH AGENTS")
-    # Enjoy trained agent
-    env = DummyVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_two_vs_one_left') for i in range(1)])
-    # env = create_single_football_env(1, 'academy_two_vs_one_left')
-    obs= env.reset()
-    rewards_1 = []
-    rewards_2 = []
-    i = 0
-    while i < (20):
-        action1, _states1 = model_1.predict(obs)
-        action2, _states2 = model_2.predict(obs)
-        action = (action1, action2)
-        obs, rewards, dones, info = env.step(action)
-        if (dones):
-            rewards_1.append(rewards[0])
-            i+=1
-    print(rewards_1)
+    n_cpu = 7
+    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_three_vs_one_left') for i in range(n_cpu)])
+    print("Start LEARNING")
 
+    model = PPO2(MlpPolicy,
+                env,n_steps=FLAGS.nsteps,
+                gamma=FLAGS.gamma,
+                ent_coef=FLAGS.ent_coef,
+                nminibatches=FLAGS.nminibatches,
+                verbose=1,
+                noptepochs=FLAGS.noptepochs,
+                learning_rate=FLAGS.lr,
+                tensorboard_log = 'gfootball/tensorboard/academy_three_vs_one_single',
+                cliprange=FLAGS.cliprange)
+
+    model.learn(total_timesteps=FLAGS.num_timesteps,
+               log_interval=1,
+               )
+    print("DONE LEARNING From academy goal")
 if __name__ == '__main__':
   train()
