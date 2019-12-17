@@ -65,22 +65,34 @@ flags.DEFINE_bool('dump_scores', False,
                   'If True, sampled traces after scoring are dumped.')
 flags.DEFINE_string('load_path', None, 'Path to load initial checkpoint from.')
 
+class FootBallEnv(gym.Env):
 
-def create_single_football_env(seed, level):
-  """Creates gfootball environment."""
-  env = football_env.create_environment(
+  def __init__(self, num_players, reward_type, level):
+    self.env = football_env.create_environment(
       env_name=level, stacked=('stacked' in 'extracted_stacked'),
-      rewards='scoring',
+      rewards='reward_type',
       logdir=logger.get_dir(),
       enable_goal_videos=False,
       enable_full_episode_videos=False,
       render=False,
       dump_frequency=0,
-      number_of_left_players_agent_controls=2)
-  env = monitor.Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(),
-                                                               str(seed)))
+      number_of_left_players_agent_controls=num_players)
+    self.action_space = self.env.action_space
+    self.observation_space = self.env.observation_space
 
-  action_space = env.action_space()
+  def reset(self):
+    orig_obs = self.env.reset()
+    return orig_obs
+
+  def step(self, action):
+    o, r, d, i = self.env.step(actions)
+    return o, sum(r), all(d), i
+
+
+def create_single_football_env(seed, level):
+  """Creates gfootball environment."""
+  
+  env = FootballEnv(2, 'scoring', level)
   return env
 
 
@@ -127,7 +139,7 @@ from stable_baselines import PPO2
 
 def train():
     n_cpu = 4
-    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_empty_goal') for i in range(1)])
+    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_two_vs_one_right') for i in range(1)])
     print("Start LEARNING")
 
     model = PPO2(MlpPolicy,
@@ -138,7 +150,7 @@ def train():
                 verbose=1,
                 noptepochs=FLAGS.noptepochs,
                 learning_rate=FLAGS.lr,
-                tensorboard_log = '/gfootball/tensorboard/academy_empty_goal_training',
+                tensorboard_log = '/gfootball/tensorboard/academy_two_vs_one_right',
                 cliprange=FLAGS.cliprange)
 
     model.learn(total_timesteps=FLAGS.num_timesteps,
@@ -146,12 +158,12 @@ def train():
                )
     print("DONE LEARNING From academy goal")
 
-    env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_empty_goal_close') for i in range(1)])
-    model.env = env
-    model.learn(total_timesteps=FLAGS.num_timesteps //2,
-               log_interval=1,
-               )
-    print("DONE LEARNING from academy empty goal close")
+    # env = SubprocVecEnv([lambda _i = i: create_single_football_env(_i, 'academy_empty_goal_close') for i in range(1)])
+    # model.env = env
+    # model.learn(total_timesteps=FLAGS.num_timesteps //2,
+    #            log_interval=1,
+    #            )
+    # print("DONE LEARNING from academy empty goal close")
 
     # model.save("ppo2_stable_baselines")
     #
